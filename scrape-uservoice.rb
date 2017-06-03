@@ -27,8 +27,10 @@ tickets.each do |ticket|
 	target.sid = ticket['ticket_number'] 
 	target.title = ticket['subject']
 	target.date_array = []
-	target.date_array << DateTime.strptime(ticket['created_at'][0,10], "%Y/%m/%d")
-
+	d = DateTime.strptime(ticket['created_at'], "%Y/%m/%d")
+	target.date_array << d.year 
+	target.date_array << d.month
+	target.date_array << d.day  
 	target.authors, target.abstracts = [], []
     messages = ticket['messages']
     messages.each do |message|    
