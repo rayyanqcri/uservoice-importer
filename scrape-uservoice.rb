@@ -19,7 +19,7 @@ API_SECRET = ENV['USERVOICE_API_SECRET']
 client = UserVoice::Client.new(SUBDOMAIN_NAME, API_KEY, API_SECRET)
 
 
-tickets = client.get_collection("/api/v1/tickets.json", :limit => 2) #change the number to the amount of tickets you want per execution
+tickets = client.get_collection("/api/v1/tickets.json", :limit => 50) #change the number to the amount of tickets you want per execution
 # puts "Total tickets: #{tickets.size}" 
 
 tickets.each do |ticket|
@@ -27,8 +27,7 @@ tickets.each do |ticket|
 	target.sid = ticket['ticket_number'] 
 	target.title = ticket['subject']
 	target.date_array = []
-	date_str = ticket['created_at'][0,10]
-	target.date_array << DateTime.strptime(date_str, "%Y/%m/%d")
+	target.date_array << DateTime.strptime(ticket['created_at'][0,10], "%Y/%m/%d")
 
 	target.authors, target.abstracts = [], []
     messages = ticket['messages']
