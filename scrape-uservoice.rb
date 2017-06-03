@@ -5,6 +5,7 @@ require 'rayyan-formats-core'
 require 'rayyan-formats-plugins'
 require 'dotenv'
 
+
 Dotenv.load
 
 RayyanFormats::Base.plugins = RayyanFormats::Base.available_plugins
@@ -17,20 +18,25 @@ API_SECRET = ENV['USERVOICE_API_SECRET']
 
 client = UserVoice::Client.new(SUBDOMAIN_NAME, API_KEY, API_SECRET)
 
-tickets = client.get_collection("/api/v1/tickets.json?page=1&per_page=2")
+
+tickets = client.get_collection("/api/v1/tickets.json", :limit => 2) #change the number to the amount of tickets you want per execution
+# puts "Total tickets: #{tickets.size}" 
+
 tickets.each do |ticket|
 	target = RayyanFormats::Target.new
 	target.sid = ticket['ticket_number'] 
 	target.title = ticket['subject']
-  # continue extracting fields, check https://github.com/rayyanqcri/rayyan-formats-plugins/blob/master/lib/rayyan-formats-plugins/plugins/endnote.rb
+	target.date_array = []
+	date_str = ticket['created_at'][0,10]
+	target.date_array << DateTime.strptime(date_str, "%Y/%m/%d")
 
-  messages = ticket['messages']
-	#puts "Ticket: \"#{ticket['ticket_number']}\", Subject: #{ticket['subject']}, Messages: #{messages.length}"
-  messages.each do |message|
-    #puts "Message from '#{message['sender']['name']}': #{message['body']}"
-  end
-  # remove the puts
+	target.authors, target.abstracts = [], []
+    messages = ticket['messages']
+    messages.each do |message|    
+		target.authors << message['sender']['name']
+    	target.abstracts << message['body']
+    end
 
-  puts plugin.export(target)
-end
+   puts plugin.export(target)
+ end
 
